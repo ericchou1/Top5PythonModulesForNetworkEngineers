@@ -1,0 +1,35 @@
+hostname RTB
+
+ip subnet-zero
+
+interface Loopback1
+ ip address 203.250.15.10 255.255.255.252
+
+interface Serial0
+ ip address 203.250.15.2 255.255.255.252
+!
+interface Serial1
+ ip address 192.208.10.6 255.255.255.252
+
+router ospf 10
+ redistribute bgp 100 metric 1000 subnets
+ passive-interface Serial1
+ network 203.250.0.0 0.0.255.255 area 0
+ network 192.208.10.6 0.0.0.0 area 0
+ default-information originate metric 1000
+!
+router bgp 100
+ no synchronization
+ network 203.250.15.0
+ neighbor 192.208.10.5 remote-as 300
+ neighbor 192.208.10.5 route-map localonly in
+ neighbor 203.250.13.41 remote-as 100
+!
+ip classless
+ip default-network 192.208.10.0
+ip as-path access-list 1 permit ^300$
+
+route-map localonly permit 10
+ match as-path 1
+set local-preference 300
+

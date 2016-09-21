@@ -1,0 +1,35 @@
+hostname RTA
+
+ip subnet-zero
+
+interface Loopback0
+ ip address 203.250.13.41 255.255.255.0
+
+interface Ethernet0
+ ip address 203.250.14.1 255.255.255.0
+
+interface Serial0
+ ip address 128.213.63.1 255.255.255.252
+
+router ospf 10
+ redistribute bgp 100 metric 2000 subnets
+ passive-interface Serial0
+ network 203.250.0.0 0.0.255.255 area 0
+ network 128.213.0.0 0.0.255.255 area 0
+ default-information originate metric 2000
+
+router bgp 100
+ no synchronization
+network 203.250.13.0
+ network 203.250.14.0
+ neighbor 128.213.63.2 remote-as 200
+ neighbor 128.213.63.2 route-map setlocalpref in
+ neighbor 203.250.15.2 remote-as 100
+ neighbor 203.250.15.2 update-source Loopback0
+
+ip classless
+ip default-network 200.200.0.0
+
+route-map setlocalpref permit 10
+ set local-preference 200
+
